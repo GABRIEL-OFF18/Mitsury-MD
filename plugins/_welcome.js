@@ -1,4 +1,3 @@
-
 export async function before(m, { conn, usedPrefix }) {
   if (!m.isGroup) return
   if (!m.messageStubType) return
@@ -9,7 +8,10 @@ export async function before(m, { conn, usedPrefix }) {
   const taguser = `@${who.split('@')[0]}`
   const botname = 'Nagi Bot'
 
-  // 📌 FKONTAK
+  const metadata = await conn.groupMetadata(m.chat)
+  const totalMembers = metadata.participants.length
+  const date = new Date().toLocaleDateString('es-ES')
+
   const fkontak = {
     key: {
       participants: '0@s.whatsapp.net',
@@ -38,7 +40,6 @@ END:VCARD`
     profile = 'https://i.imgur.com/JP52fdP.png'
   }
 
-  // ===== WELCOME =====
   if (m.messageStubType === 27) {
     const welcomeImg =
       'https://api.ryuu-dev.offc.my.id/tools/WelcomeLeave?' +
@@ -66,14 +67,14 @@ END:VCARD`
 ✨ *Bienvenido/a al grupo* ✨
 
 👤 Usuario: ${taguser}
-
-📌 Para usar los comandos del bot
-debes registrarte primero.
+🌎 País: Desconocido
+👥 Miembros totales: ${totalMembers}
+📅 Fecha: ${date}
 `.trim(),
 
         footer: `© ${botname} · Welcome`,
 
-        // 🔘 BOTÓN QUICK_REPLY
+        // 🔘 BOTÓN REGISTRO
         interactiveButtons: [
           {
             name: 'quick_reply',
@@ -90,7 +91,6 @@ debes registrarte primero.
     )
   }
 
-  // ===== GOODBYE =====
   if (m.messageStubType === 28 || m.messageStubType === 32) {
     const goodbyeImg =
       'https://api.ryuu-dev.offc.my.id/tools/WelcomeLeave?' +
@@ -116,12 +116,12 @@ debes registrarte primero.
 
         caption: `
 👤 Usuario: ${taguser}
+📅 Fecha: ${date}
 salió del grupo.
 `.trim(),
 
         footer: `© ${botname} · Goodbye`,
 
-        // 🔘 BOTÓN TAMBIÉN AQUÍ
         interactiveButtons: [
           {
             name: 'quick_reply',
