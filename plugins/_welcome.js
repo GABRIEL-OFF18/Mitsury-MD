@@ -1,4 +1,3 @@
-
 export async function before(m, { conn }) {
   if (!m.isGroup) return
   if (!m.messageStubType) return
@@ -9,13 +8,15 @@ export async function before(m, { conn }) {
   const taguser = `@${who.split('@')[0]}`
   const botname = 'Nagi Bot'
 
+  // 📸 Foto real del usuario
   let profile
   try {
     profile = await conn.profilePictureUrl(who, 'image')
   } catch {
-    profile = 'https://i.imgur.com/JP52fdP.png' // fallback
+    profile = 'https://i.imgur.com/JP52fdP.png'
   }
 
+  // ===== WELCOME =====
   if (m.messageStubType === 27) {
     const welcomeImg =
       'https://api.ryuu-dev.offc.my.id/tools/WelcomeLeave?' +
@@ -28,26 +29,42 @@ export async function before(m, { conn }) {
       product: {
         productImage: { url: welcomeImg },
         productId: 'welcome-001',
-        title: `─ W E L C O M E ─🥷🏻`,
+        title: `👋 Bienvenido a ${botname}`,
         currencyCode: 'USD',
         priceAmount1000: '0',
         retailerId: 1677,
         productImageCount: 1
       },
+
       businessOwnerJid: '0@s.whatsapp.net',
+
       caption: `
 ✨ *Bienvenido/a al grupo* ✨
 
 👤 Usuario: ${taguser}
 
 📌 Para usar los comandos del bot
-debes registrarte primero.
+regístrate primero.
 `.trim(),
+
       footer: `© ${botname} · Welcome`,
+
+      // 🔘 BOTÓN COMO TU MENÚ
+      interactiveButtons: [
+        {
+          name: 'cta_url',
+          buttonParamsJson: JSON.stringify({
+            display_text: '📢 Canal WhatsApp',
+            url: 'https://whatsapp.com/channel/0029Vb6BDQc0lwgsDN1GJ31i'
+          })
+        }
+      ],
+
       mentions: [who]
     })
   }
 
+  // ===== GOODBYE =====
   if (m.messageStubType === 28 || m.messageStubType === 32) {
     const goodbyeImg =
       'https://api.ryuu-dev.offc.my.id/tools/WelcomeLeave?' +
@@ -60,15 +77,33 @@ debes registrarte primero.
       product: {
         productImage: { url: goodbyeImg },
         productId: 'goodbye-001',
-        title: '─Ａ Ｄ Ｉ Ō S─👋🏻',
+        title: '👋 Hasta luego',
         currencyCode: 'USD',
         priceAmount1000: '0',
         retailerId: 1677,
         productImageCount: 1
       },
+
       businessOwnerJid: '0@s.whatsapp.net',
-      caption: `👤 Usuario: ${taguser}\nSalió del grupo.`,
+
+      caption: `
+👤 Usuario: ${taguser}
+salió del grupo.
+`.trim(),
+
       footer: `© ${botname} · Goodbye`,
+
+      // 🔘 BOTÓN TAMBIÉN AQUÍ
+      interactiveButtons: [
+        {
+          name: 'cta_url',
+          buttonParamsJson: JSON.stringify({
+            display_text: '📢 Canal WhatsApp',
+            url: 'https://whatsapp.com/channel/0029Vb6BDQc0lwgsDN1GJ31i'
+          })
+        }
+      ],
+
       mentions: [who]
     })
   }
