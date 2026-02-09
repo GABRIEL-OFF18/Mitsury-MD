@@ -97,7 +97,6 @@ Vistas : ${video.views.toLocaleString()}
 
     await m.react('🕓')
 
-    // 🎧 DESCARGA AUDIO
     const { buffer, fileName } = await yt.download(video.url, '128k')
 
     await conn.sendMessage(
