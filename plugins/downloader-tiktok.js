@@ -1,65 +1,59 @@
-import fetch from 'node-fetch'
+import axios from 'axios'
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
+  if (m.key.fromMe) return
+
   try {
-    if (!text) {
+    let url = text
+
+    // 📌 SI NO HAY TEXTO, BUSCAR LINK EN LA VISTA PREVIA
+    if (!url) {
+      const ctx =
+        m.message?.extendedTextMessage?.contextInfo ||
+        m.message?.imageMessage?.contextInfo ||
+        m.message?.videoMessage?.contextInfo
+
+      url = ctx?.canonicalUrl || ctx?.text || ''
+    }
+
+    if (!url || !url.includes('tiktok.com')) {
       return conn.reply(
         m.chat,
-        `*☘️ Envíe un enlace de ${usedPrefix + command}, para hacer la descarga*`,
+        `*☘️ Envíe un enlace de TikTok*\n\nEjemplo:\n${usedPrefix + command} https://vt.tiktok.com/xxxx`,
         m,
         rcanal
       )
     }
 
-    await m.react('⏳')
-
-    const api = `https://neji-api.vercel.app/api/downloader/tiktok?url=${encodeURIComponent(text)}`
-    const res = await fetch(api)
-    const json = await res.json()
-
-    if (!json.status) {
-      return conn.reply(m.chat, '❌ No se pudo descargar el TikTok', m, rcanal)
-    }
-
-    const data = json.result
-    const videoUrl = data.cover.play
-
     await conn.reply(
       m.chat,
-`🎵 *TikTok Downloader*
-
-👤 Autor: ${data.author_info.nickname}
-⏱ Duración: ${data.cover.duration}s
-🎧 Música: ${data.music.title}
-
-> Preparando tu descarga...`,
+      '*⏳ Preparando tu descarga...*',
       m,
       rcanal
     )
 
-    const videoRes = await fetch(videoUrl)
-    const buffer = Buffer.from(await videoRes.arrayBuffer())
+    const api = `https://neji-api.vercel.app/api/downloader/tiktok?url=${encodeURIComponent(url)}`
+    const { data } = await axios.get(api)
+
+    if (!data.status) throw 'No se pudo descargar'
+
+    const video = data.result.cover.play
+    const title = data.result.title || 'TikTok'
 
     await conn.sendMessage(
       m.chat,
       {
-        video: buffer,
-        mimetype: 'video/mp4',
-        caption: data.title || 'TikTok'
+        video: { url: video },
+        caption: `🎵 *TikTok Downloader*\n\n📌 ${title}`
       },
       { quoted: m }
     )
 
-    await m.react('✅')
-
   } catch (e) {
     console.error(e)
-    conn.reply(m.chat, '❌ Error al procesar el TikTok', m, rcanal)
+    conn.reply(m.chat, '*❌ Error al descargar el video*', m, rcanal)
   }
 }
 
-handler.help = ['tiktok <url>']
-handler.tags = ['dl']
-handler.command = ['tiktok', 'tt']
-
+handler.command = ['tt', 'tiktok']
 export default handler
