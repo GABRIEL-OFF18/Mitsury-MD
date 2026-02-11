@@ -42,8 +42,6 @@ let handler = async (m, { conn, usedPrefix }) => {
   let caption = `
 *Hola ${nombre}*
 
-\`${botname}\` sistema automatizado para comandos y utilidades.
-
 *Usuario* ┆ ${taguser}
 *Hora* ┆ ${hora}
 *Fecha* ┆ ${fecha}
