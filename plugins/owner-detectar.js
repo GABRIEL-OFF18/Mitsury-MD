@@ -38,7 +38,7 @@ let handler = async (m) => {
 }
 
 handler.command = ['detectarsyntax', 'detectar']
-handler.tags = ['tools']
+handler.tags = ['owner']
 handler.help = ['detectar']
 handler.rowner = true
 
