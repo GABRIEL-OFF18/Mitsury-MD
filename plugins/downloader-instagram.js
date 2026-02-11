@@ -78,7 +78,7 @@ let handler = async (m, { conn, text }) => {
   }
 }
 
-handler.help = ['instagram <url>', 'ig', 'igdl']
+handler.help = ['instagram <url>']
 handler.tags = ['downloader']
 handler.command = ['instagram', 'ig', 'igdl']
 handler.register = true
