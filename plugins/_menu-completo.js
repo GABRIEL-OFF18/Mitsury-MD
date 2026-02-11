@@ -83,7 +83,7 @@ ${comandos}`
     },
     businessOwnerJid: who,
     caption: caption.trim(),
-    footer: '© megumi · Menu',
+    footer: '\n© megumi · Menu',
     interactiveButtons: [
       {
         name: 'cta_url',
