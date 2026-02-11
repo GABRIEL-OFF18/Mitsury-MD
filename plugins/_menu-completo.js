@@ -59,7 +59,6 @@ let handler = async (m, { conn, usedPrefix }) => {
 ━━━━━━━━━━━━━
 `.trim()
 
-  // 📜 MENÚ AUTOMÁTICO
   for (let tag of categorias) {
     let comandos = plugins
       .filter(p => p.tags.includes(tag))
