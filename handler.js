@@ -23,8 +23,6 @@ export async function handler(chatUpdate) {
     let m = chatUpdate.messages[chatUpdate.messages.length - 1]
     if (!m) return
 
-    if (m.key && m.key.fromMe) return 
-
     if (global.db.data == null) await global.loadDatabase()
 
     try {
@@ -91,12 +89,7 @@ export async function handler(chatUpdate) {
 
             const strRegex = (str) => str.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&")
             const pluginPrefix = plugin.customPrefix || this.prefix || global.prefix
-            
-            let match = findPrefixMatch(m.text, pluginPrefix, strRegex)
-            
-            if (!match && !plugin.customPrefix) {
-                match = [ [[""], ""] ] 
-            }
+            const match = findPrefixMatch(m.text, pluginPrefix, strRegex)
 
             if (typeof plugin.before === "function") {
                 if (await plugin.before.call(this, m, { ...extraContext, match, __filename })) continue
@@ -160,20 +153,9 @@ export async function handler(chatUpdate) {
     }
 }
 
-function getPermissions(conn, m, user) {
-    const owners = global.owner.map(n => Array.isArray(n) ? n[0] : n)
-        .filter(v => typeof v === "string")
-        .map(v => v.replace(/[^0-9]/g, ""))
-
-    const isROwner = owners.flatMap(v => [`${v}@s.whatsapp.net`, `${v}@lid`]).includes(m.sender)
-    const isOwner = isROwner || m.fromMe // Esto detecta si el mensaje es del bot
-    const isPrems = isROwner || user.premium || global.prems.some(v => v.replace(/[^0-9]/g, "") + "@s.whatsapp.net" === m.sender)
-    const isOwners = [conn.user.jid, ...owners.map(v => `${v}@s.whatsapp.net`)].includes(m.sender)
-
-    return { isROwner, isOwner, isPrems, isOwners }
-}
 
 function ensureDatabaseSchema(m, botJid) {
+
     if (typeof global.db.data.users[m.sender] !== "object") global.db.data.users[m.sender] = {}
     const user = global.db.data.users[m.sender]
     const userDefault = {
@@ -201,6 +183,19 @@ function ensureDatabaseSchema(m, botJid) {
     if (!("jadibotmd" in settings)) settings.jadibotmd = true
 }
 
+function getPermissions(conn, m, user) {
+    const owners = global.owner.map(n => Array.isArray(n) ? n[0] : n)
+        .filter(v => typeof v === "string")
+        .map(v => v.replace(/[^0-9]/g, ""))
+
+    const isROwner = owners.flatMap(v => [`${v}@s.whatsapp.net`, `${v}@lid`]).includes(m.sender)
+    const isOwner = isROwner || m.fromMe
+    const isPrems = isROwner || user.premium || global.prems.some(v => v.replace(/[^0-9]/g, "") + "@s.whatsapp.net" === m.sender)
+    const isOwners = [conn.user.jid, ...owners.map(v => `${v}@s.whatsapp.net`)].includes(m.sender)
+
+    return { isROwner, isOwner, isPrems, isOwners }
+}
+
 async function getGroupMetadata(conn, m) {
     if (!m.isGroup) return { participants: [], groupMetadata: {}, userGroup: {}, botGroup: {}, isRAdmin: false, isAdmin: false, isBotAdmin: false }
     
@@ -225,7 +220,7 @@ async function getGroupMetadata(conn, m) {
 function findPrefixMatch(text, prefix, strRegex) {
     const prefixes = Array.isArray(prefix) ? prefix : [prefix]
     for (let p of prefixes) {
-        const regex = p instanceof RegExp ? p : new RegExp("^" + strRegex(p))
+        const regex = p instanceof RegExp ? p : new RegExp(strRegex(p))
         const match = regex.exec(text)
         if (match) return [match, regex]
     }
@@ -240,12 +235,16 @@ function checkCommand(plugin, command) {
 
 function isRestricted(m, user, chat, isROwner, botId, usedPrefix, pluginName) {
     if (isROwner) return false
+    
+    // Chat baneado
     if (pluginName !== "group-banchat.js" && chat.isBanned) {
         if (!chat.primaryBot || chat.primaryBot === botId) {
-            m.reply(`🐱 El bot está desactivado en este grupo.\nUsa *${usedPrefix}bot on* para activar.`)
+            m.reply(`💙 El bot está desactivado en este grupo.\nUsa *${usedPrefix}bot on* para activar.`)
             return true
         }
     }
+    
+    // Usuario baneado
     if (user.banned) {
         m.reply(`🖤 Estás baneado.\n*Razón:* ${user.bannedReason}`)
         return true
@@ -276,14 +275,17 @@ function getFailType(plugin, { isROwner, isOwner, isPrems, isBotAdmin, isAdmin, 
 function shouldIgnoreMessage(conn, m, settings, isOwners) {
     if (m.isBaileys) return true
     if (settings.self && !isOwners) return true
+    // Ignorar IDs de bots conocidos
     if (m.id.startsWith("NJX-") || (m.id.startsWith("BAE5") && m.id.length === 16) || (m.id.startsWith("B24E") && m.id.length === 20)) return true
     return false
 }
 
 function isMultiBotConflict(m, chat) {
     if (!chat.primaryBot || chat.primaryBot === this.user.jid) return false
+    
     const primaryBotConn = global.conns?.find(c => c.user.jid === chat.primaryBot && c.ws?.socket?.readyState !== ws.CLOSED)
     if (primaryBotConn) return true 
+    
     chat.primaryBot = null 
     return false
 }
@@ -312,14 +314,18 @@ async function finalizeHandler(m) {
         const idx = this.msgqueque.indexOf(m.id || m.key.id)
         if (idx !== -1) this.msgqueque.splice(idx, 1)
     }
+    
     const user = global.db.data.users[m.sender]
     if (m && m.sender && user) user.exp += (m.exp || 0)
+
     try {
         if (!opts["noprint"]) {
             const print = (await import("./lib/print.js")).default
             await print(m, this)
         }
-    } catch (e) { console.warn(e) }
+    } catch (e) {
+        console.warn(e)
+    }
 }
 
 global.dfail = (type, m, conn) => {
