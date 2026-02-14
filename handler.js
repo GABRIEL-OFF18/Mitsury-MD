@@ -23,6 +23,8 @@ export async function handler(chatUpdate) {
     let m = chatUpdate.messages[chatUpdate.messages.length - 1]
     if (!m) return
 
+    if (m.key && m.key.fromMe) return 
+
     if (global.db.data == null) await global.loadDatabase()
 
     try {
@@ -158,6 +160,18 @@ export async function handler(chatUpdate) {
     }
 }
 
+function getPermissions(conn, m, user) {
+    const owners = global.owner.map(n => Array.isArray(n) ? n[0] : n)
+        .filter(v => typeof v === "string")
+        .map(v => v.replace(/[^0-9]/g, ""))
+
+    const isROwner = owners.flatMap(v => [`${v}@s.whatsapp.net`, `${v}@lid`]).includes(m.sender)
+    const isOwner = isROwner || m.fromMe // Esto detecta si el mensaje es del bot
+    const isPrems = isROwner || user.premium || global.prems.some(v => v.replace(/[^0-9]/g, "") + "@s.whatsapp.net" === m.sender)
+    const isOwners = [conn.user.jid, ...owners.map(v => `${v}@s.whatsapp.net`)].includes(m.sender)
+
+    return { isROwner, isOwner, isPrems, isOwners }
+}
 
 function ensureDatabaseSchema(m, botJid) {
     if (typeof global.db.data.users[m.sender] !== "object") global.db.data.users[m.sender] = {}
@@ -185,19 +199,6 @@ function ensureDatabaseSchema(m, botJid) {
     const settings = global.db.data.settings[botJid]
     if (!("self" in settings)) settings.self = false
     if (!("jadibotmd" in settings)) settings.jadibotmd = true
-}
-
-function getPermissions(conn, m, user) {
-    const owners = global.owner.map(n => Array.isArray(n) ? n[0] : n)
-        .filter(v => typeof v === "string")
-        .map(v => v.replace(/[^0-9]/g, ""))
-
-    const isROwner = owners.flatMap(v => [`${v}@s.whatsapp.net`, `${v}@lid`]).includes(m.sender)
-    const isOwner = isROwner || m.fromMe
-    const isPrems = isROwner || user.premium || global.prems.some(v => v.replace(/[^0-9]/g, "") + "@s.whatsapp.net" === m.sender)
-    const isOwners = [conn.user.jid, ...owners.map(v => `${v}@s.whatsapp.net`)].includes(m.sender)
-
-    return { isROwner, isOwner, isPrems, isOwners }
 }
 
 async function getGroupMetadata(conn, m) {
