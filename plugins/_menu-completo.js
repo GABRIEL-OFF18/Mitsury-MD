@@ -67,7 +67,7 @@ let handler = async (m, { conn, usedPrefix }) => {
 ${comandos}`
   }
 
-  const file = 'https://files.catbox.moe/uhyou7.jpeg'
+  const file = 'https://cdn.yupra.my.id/yp/6zu4qxn5.jpg'
 
   await conn.sendMessage(m.chat, {
     product: {
