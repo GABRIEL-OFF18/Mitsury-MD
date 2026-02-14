@@ -6,8 +6,8 @@ import fetch from 'node-fetch'
 let handler = m => m
 handler.all = async function (m, { conn }) {
 
-    global.logo = 'https://raw.githubusercontent.com/El-brayan502/img/upload/uploads/6bd2c3-1770600514663.jpg' 
-    global.iconorcanal = 'https://files.catbox.moe/uhyou7.jpeg'
+    global.logo = 'https://cdn.yupra.my.id/yp/w6a6j1og.jpg' 
+    global.iconorcanal = 'https://cdn.yupra.my.id/yp/w6a6j1og.jpg'
 
     global.idcanal = '120363417186717632@newsletter' 
     global.nombrecanal = '🐺 megumi fushiguro'
