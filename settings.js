@@ -47,7 +47,6 @@ global.multiplier = 69
 global.maxwarn = 3
 global.fs = fs
 global.fetch = fetch
-global.axios = axios
 global.moment = moment
 
 
