@@ -45,7 +45,6 @@ global.listo = '*Aqui tiene*'
 global.moneda = 'Yenes'
 global.multiplier = 69
 global.maxwarn = 3
-global.cheerio = cheerio
 global.fs = fs
 global.fetch = fetch
 global.axios = axios
