@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url'
 import fs from 'fs'
 import moment from 'moment-timezone'
 
-global.botNumber = '' 
+global.botNumber = '59175850453' 
 global.owner = [
   ['573244278232', 'Neji ssj', true],
   ['50231458537', 'BrayanX330', true],
