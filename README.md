@@ -1,4 +1,4 @@
-![nagi Bot](https://raw.githubusercontent.com/El-brayan502/img/upload/uploads/d90732-1770594984101.jpg)
+![nagi Bot](https://cdn.yupra.my.id/yp/8mocro3k.jpg)
 
 ---
 
