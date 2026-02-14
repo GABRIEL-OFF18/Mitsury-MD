@@ -37,9 +37,19 @@ export async function handler(chatUpdate) {
         const chat = global.db.data.chats[m.chat]
         const settings = global.db.data.settings[botJid]
 
-        m.text = (
-            (m.text || (m.msg && m.msg.caption) || (m.msg && m.msg.text) || (m.msg && m.msg.contentText) || (m.msg && m.msg.selectedDisplayText) || "")
-        ).trim()
+        if (typeof m.text !== "string") {
+            m.text = (
+                m.msg?.conversation || 
+                m.msg?.text || 
+                m.msg?.caption || 
+                (m.message?.extendedTextMessage?.text) || 
+                (m.message?.buttonsResponseMessage?.selectedButtonId) || 
+                (m.message?.listResponseMessage?.singleSelectReply?.selectedRowId) || 
+                (m.msg?.contentText) || 
+                ""
+            )
+        }
+        m.text = (m.text || "").trim()
 
         updateUserName(this, m, user)
 
@@ -133,7 +143,7 @@ export async function handler(chatUpdate) {
                         try { await plugin.after.call(this, m, pluginArgs) } catch (e) { console.error(e) }
                     }
                 }
-                break //  Command executed, exit loop 
+                break 
             }
         }
     } catch (err) {
@@ -229,7 +239,7 @@ function isRestricted(m, user, chat, isROwner, botId, usedPrefix, pluginName) {
     // Chat baneado
     if (pluginName !== "group-banchat.js" && chat.isBanned) {
         if (!chat.primaryBot || chat.primaryBot === botId) {
-            m.reply(`💙 El bot está desactivado en este grupo.\nUsa *${usedPrefix}bot on* para activar.`)
+            m.reply(`🐱 El bot está desactivado en este grupo.\nUsa *${usedPrefix}bot on* para activar.`)
             return true
         }
     }
@@ -265,7 +275,7 @@ function getFailType(plugin, { isROwner, isOwner, isPrems, isBotAdmin, isAdmin, 
 function shouldIgnoreMessage(conn, m, settings, isOwners) {
     if (m.isBaileys) return true
     if (settings.self && !isOwners) return true
-    // Ignorar IDs de bots conocidos
+    
     if (m.id.startsWith("NJX-") || (m.id.startsWith("BAE5") && m.id.length === 16) || (m.id.startsWith("B24E") && m.id.length === 20)) return true
     return false
 }
